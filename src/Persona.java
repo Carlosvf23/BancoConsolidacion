@@ -12,8 +12,29 @@ public class Persona {
         this.rut = rut;
         this.fechaNacimiento = fechaNacimiento;
     }
-    public int getEdad() {
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getRut() {
+        return rut;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public int getEdad() {
         return Period.between(fechaNacimiento, LocalDate.now()).getYears();
+    }
+
+    @Override
+    public String toString() {
+        return "Persona{" +
+                "nombre='" + nombre + '\'' +
+                ", rut='" + rut + '\'' +
+                ", fechaNacimiento=" + fechaNacimiento +
+                '}';
     }
 }

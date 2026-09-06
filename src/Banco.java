@@ -5,25 +5,56 @@ public class Banco {
     private ArrayList<CuentaBancaria> cuentas;
 
     public Banco() {
-        this.cuentas = new ArrayList<CuentaBancaria>();
+        cuentas = new ArrayList<>();
     }
+
     public boolean agregarCuenta(CuentaBancaria cuenta) {
-        if (buscarCuenta(cuenta.getNumeroCuenta())==null){
-            this.cuentas.add(cuenta);
-            return true;
-
-        }   else {return false;
-
+        if (buscarCuenta(cuenta.getNumeroCuenta()) != null) {
+            return false;
         }
 
+        cuentas.add(cuenta);
+        return true;
     }
-    public CuentaBancaria buscarCuenta(String numeroCuenta){
-        for (CuentaBancaria cuenta : this.cuentas){
-            if (cuenta.getNumeroCuenta().equals(numeroCuenta)){
+
+    public CuentaBancaria buscarCuenta(String numeroCuenta) {
+
+        for (CuentaBancaria cuenta : cuentas) {
+
+            if (cuenta.getNumeroCuenta().equals(numeroCuenta)) {
                 return cuenta;
             }
-        }return null;
+        }
+
+        return null;
     }
 
-} // ← Banco termina AQUÍ
+    public boolean depositar(String numeroCuenta, double monto) {
 
+        CuentaBancaria cuenta = buscarCuenta(numeroCuenta);
+
+        if (cuenta == null) {
+            return false;
+        }
+
+        return cuenta.depositar(monto);
+    }
+
+    public boolean retirar(String numeroCuenta, double monto) {
+
+        CuentaBancaria cuenta = buscarCuenta(numeroCuenta);
+
+        if (cuenta == null) {
+            return false;
+        }
+
+        return cuenta.retirar(monto);
+    }
+
+    public ArrayList<CuentaBancaria> getCuentas() {
+        return cuentas;
+    }
+    public interface Transferible {
+        boolean transferir(CuentaBancaria destino, double monto);
+    }
+}
