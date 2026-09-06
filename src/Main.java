@@ -35,5 +35,14 @@ public class Main {
         System.out.println("Saldo cuenta corriente: " + cuentaCorriente.getSaldo());
         System.out.println("Saldo cuenta vista: " + cuentaVista.getSaldo());
         System.out.println(cuentaCorriente.getEstado());
+
+        cuentaCorriente.bloquearCuenta();
+
+        System.out.println("Estado: " + cuentaCorriente.getEstado());
+
+        boolean resultado = cuentaCorriente.transferir(cuentaVista, 30000);
+        System.out.println("Transferencia: " + resultado);
+        System.out.println("Saldo corriente: " + cuentaCorriente.getSaldo());
+        System.out.println("Saldo vista: " + cuentaVista.getSaldo());
     }
 }

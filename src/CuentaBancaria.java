@@ -33,7 +33,9 @@ public abstract class CuentaBancaria {
     public static int getCantidadTotalCuentasCreadas() {
         return cantidadTotalCuentasCreadas;
     }
-
+    public void bloquearCuenta() {
+        estado = EstadoCuenta.BLOQUEADA;
+    }
 
     public boolean depositar(double monto) {
         if (monto <= 0) {
@@ -45,6 +47,11 @@ public abstract class CuentaBancaria {
     }
 
     public boolean retirar(double monto) {
+        if (estado != EstadoCuenta.ACTIVA) {
+            return false;
+        }
+
+
         if (monto <= 0 || monto > saldo) {
             return false;
         }
