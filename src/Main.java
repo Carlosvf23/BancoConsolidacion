@@ -38,11 +38,54 @@ public class Main {
 
         cuentaCorriente.bloquearCuenta();
 
+
         System.out.println("Estado: " + cuentaCorriente.getEstado());
 
-        boolean resultado = cuentaCorriente.transferir(cuentaVista, 30000);
-        System.out.println("Transferencia: " + resultado);
-        System.out.println("Saldo corriente: " + cuentaCorriente.getSaldo());
-        System.out.println("Saldo vista: " + cuentaVista.getSaldo());
+        try {
+
+            boolean resultado = cuentaCorriente.transferir(cuentaVista, 30000);
+
+            System.out.println("Transferencia: " + resultado);
+
+        } catch (CuentaBloqueadaException e) {
+
+            System.out.println("Error: " + e.getMessage());
+        }
+
+
+
+        try {
+
+            cuentaCorriente.retirar(10000);
+
+            System.out.println("Retiro realizado");
+
+        } catch (CuentaBloqueadaException e) {
+
+            System.out.println("Error: " + e.getMessage());
+
+        }
+
+
+        /*try {
+            cuentaCorriente.retirar(-5000);
+        } catch (SaldoInsuficienteException e) {
+            System.out.println("Error:"+ e.getMessage());
+
+        }*/
+
+        try {
+            cuentaCorriente.retirar(5000000);
+
+        } catch (CuentaBloqueadaException e) {
+            System.out.println("Error " + e.getMessage());
+
+        } catch (MontoInvalidoException e) {
+            System.out.println("Error " + e.getMessage());
+
+        } catch (SaldoInsuficienteException e) {
+            System.out.println("Error " + e.getMessage());
+        }
+
     }
 }

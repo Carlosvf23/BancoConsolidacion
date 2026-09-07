@@ -36,6 +36,8 @@ public abstract class CuentaBancaria {
     public void bloquearCuenta() {
         estado = EstadoCuenta.BLOQUEADA;
     }
+    public void activarCuenta() {estado = EstadoCuenta.ACTIVA;
+    }
 
     public boolean depositar(double monto) {
         if (monto <= 0) {
@@ -48,12 +50,16 @@ public abstract class CuentaBancaria {
 
     public boolean retirar(double monto) {
         if (estado != EstadoCuenta.ACTIVA) {
-            return false;
+            throw new CuentaBloqueadaException("La cuenta no está activa");
         }
 
 
-        if (monto <= 0 || monto > saldo) {
-            return false;
+        if (monto <= 0) {
+            throw new MontoInvalidoException("El monto debe ser mayor a 0");
+        }
+
+        if (monto > saldo) {
+            throw new SaldoInsuficienteException("La cuenta no tiene saldo suficiente");
         }
 
         saldo -= monto;
