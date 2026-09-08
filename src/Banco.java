@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Banco {
 
@@ -57,4 +58,28 @@ public class Banco {
     public interface Transferible {
         boolean transferir(CuentaBancaria destino, double monto);
     }
+    public ArrayList<CuentaBancaria> obtenerCuentasPorEstado(EstadoCuenta estado) {
+
+        ArrayList<CuentaBancaria> cuentasFiltradas = new ArrayList<>();
+        for (CuentaBancaria cuenta : cuentas) {
+            if (cuenta.getEstado()== estado){
+                cuentasFiltradas.add(cuenta);
+            }
+
+        }return cuentasFiltradas;
+    }
+    public List<CuentaBancaria> obtenerCuentasPorEstadoStream(EstadoCuenta estado){
+        return cuentas.stream()
+                .filter(cuenta ->cuenta.getEstado()==estado)
+                .toList();
+    }
+    public List<CuentaBancaria> obtenerCuentasConSaldoMayorA(double monto) {
+
+        return cuentas.stream()
+                .filter(cuenta -> cuenta.getSaldo() > monto)
+                .toList();
+    }
+
+
+
 }

@@ -1,3 +1,5 @@
+import jdk.swing.interop.SwingInterOpUtils;
+
 import java.time.LocalDate;
 
 public class Main {
@@ -9,6 +11,11 @@ public class Main {
                 "12345678-9",
                 LocalDate.of(1995, 3, 7)
         );
+        Persona persona2 = new Persona(
+                "Felipe",
+                "12345678-4",
+                LocalDate.of(1995, 3, 7)
+        );
 
         Banco banco = new Banco();
 
@@ -18,15 +25,17 @@ public class Main {
 
        // CuentaVista cuentaVista = new CuentaVista("003",persona1);
         CuentaBancaria cuentaVista = new CuentaVista("003",persona1);
-
+        CuentaBancaria cuentaVista1 = new CuentaVista("004",persona2);
+        banco.agregarCuenta(cuentaVista);
+        banco.agregarCuenta(cuentaVista1);
         System.out.println(cuentaVista.calcularCostoMantencion());
-        System.out.println(CuentaBancaria.getCantidadTotalCuentasCreadas());
+
 
 
         CuentaCorriente cuentaCorriente = new CuentaCorriente("001",persona1,500000
         );
         cuentaCorriente.depositar(100000);
-
+        banco.agregarCuenta(cuentaCorriente);
         cuentaCorriente.transferir(cuentaVista,30000);
 
         cuentaCorriente.getSaldo();
@@ -74,7 +83,7 @@ public class Main {
 
         }*/
 
-        try {
+        /*try {
             cuentaCorriente.retirar(5000000);
 
         } catch (CuentaBloqueadaException e) {
@@ -85,7 +94,21 @@ public class Main {
 
         } catch (SaldoInsuficienteException e) {
             System.out.println("Error " + e.getMessage());
+        }*/
+        try {
+            cuentaCorriente.depositar(-2000);
+        }catch (MontoInvalidoException e){
+            System.out.println("Error "+ e.getMessage());
         }
 
+        for (CuentaBancaria cuenta :
+                banco.obtenerCuentasPorEstadoStream(EstadoCuenta.ACTIVA)) {
+
+            System.out.println(cuenta);
+        }
+        for (CuentaBancaria cuenta : banco.obtenerCuentasConSaldoMayorA(10000000)) {
+            System.out.println(cuenta);
+        }
     }
+
 }

@@ -41,7 +41,7 @@ public abstract class CuentaBancaria {
 
     public boolean depositar(double monto) {
         if (monto <= 0) {
-            return false;
+            throw new MontoInvalidoException("El monto debe ser mayor a 0");
         }
 
         saldo += monto;
