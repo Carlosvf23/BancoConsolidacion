@@ -1,6 +1,7 @@
 import jdk.swing.interop.SwingInterOpUtils;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Main {
 
@@ -109,6 +110,39 @@ public class Main {
         for (CuentaBancaria cuenta : banco.obtenerCuentasConSaldoMayorA(10000000)) {
             System.out.println(cuenta);
         }
+        System.out.println(
+                "Cuentas activas: " +
+                        banco.contarCuentasPorEstado(EstadoCuenta.BLOQUEADA)
+        );
+        System.out.println(banco.existeCuentaConSaldoMayorA(1000)
+        );
+        System.out.println(
+                banco.existeCuentaConSaldoMayorA(1000000)
+        );
+        for (String numero : banco.obtenerNumerosDeCuenta()) {
+            System.out.println("Número: " + numero);
+        }
+        for (String numero : banco.obtenerNumerosCuentasActivas()) {
+            System.out.println("Cuenta activa: " + numero);
+        }
+        Optional<CuentaBancaria> resultado = banco.obtenerPrimeraCuentaActiva();
+
+        if (resultado.isPresent()) {
+            System.out.println("Primera activa: " + resultado.get());
+        }
+        banco.obtenerPrimeraCuentaActiva()
+                .ifPresent(cuenta -> System.out.println("Primera activa: " + cuenta));
+
+        System.out.println(banco.buscarCuenta("003"));
+        System.out.println(banco.buscarCuenta("999"));
+
+        try {
+            banco.retirar("999", 10000);
+        } catch (CuentaNoEncontradaException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+
     }
 
 }
