@@ -3,7 +3,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,6 +54,29 @@ public class CuentaCorrienteTest {
 
         assertEquals(
                 new BigDecimal("30000"),
+                destino.getSaldo()
+        );
+    }
+    @Test
+    void transferirDesdeCuentaBloqueadaNoDebeModificarSaldos() {
+
+        origen.bloquearCuenta();
+
+        assertThrows(
+                CuentaBloqueadaException.class,
+                () -> origen.transferir(
+                        destino,
+                        new BigDecimal("30000")
+                )
+        );
+
+        assertEquals(
+                new BigDecimal("100000"),
+                origen.getSaldo()
+        );
+
+        assertEquals(
+                BigDecimal.ZERO,
                 destino.getSaldo()
         );
     }
