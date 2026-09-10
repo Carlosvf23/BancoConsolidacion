@@ -1,10 +1,15 @@
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
+import java.sql.Connection;
+import java.sql.SQLException;
 public class Main {
 
     public static void main(String[] args) {
-
+        try (Connection conexion = ConexionBD.obtenerConexion()) {
+            System.out.println("Conexión a PostgreSQL exitosa");
+        } catch (SQLException e) {
+            System.out.println("Error de conexión: " + e.getMessage());
+        }
         Persona persona1 = new Persona(
                 "Carlos",
                 "12345678-9",
