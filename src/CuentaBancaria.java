@@ -1,16 +1,18 @@
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.Objects;
 public abstract class CuentaBancaria {
 
     private final String numeroCuenta;
     private Persona titular;
-    private double saldo;
+    private BigDecimal saldo;
     private EstadoCuenta estado;
+
     private static int cantidadTotalCuentasCreadas = 0;
 
     public CuentaBancaria(String numeroCuenta, Persona titular) {
         this.numeroCuenta = numeroCuenta;
         this.titular = titular;
-        this.saldo = 0;
+        this.saldo = BigDecimal.ZERO;
         this.estado = EstadoCuenta.ACTIVA;
 
         cantidadTotalCuentasCreadas++;
@@ -24,57 +26,88 @@ public abstract class CuentaBancaria {
         return titular;
     }
 
-    public double getSaldo() {
+    public BigDecimal getSaldo() {
         return saldo;
     }
-    public EstadoCuenta getEstado(){
+
+    public EstadoCuenta getEstado() {
         return estado;
     }
 
     public static int getCantidadTotalCuentasCreadas() {
         return cantidadTotalCuentasCreadas;
     }
+
     public void bloquearCuenta() {
         estado = EstadoCuenta.BLOQUEADA;
     }
-    public void activarCuenta() {estado = EstadoCuenta.ACTIVA;
+
+    public void activarCuenta() {
+        estado = EstadoCuenta.ACTIVA;
     }
 
-    public boolean depositar(double monto) {
-        if (monto <= 0) {
-            throw new MontoInvalidoException("El monto debe ser mayor a 0");
+    public boolean depositar(BigDecimal monto) {
+
+        if (monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new MontoInvalidoException(
+                    "El monto debe ser mayor a 0"
+            );
         }
 
-        saldo += monto;
+        saldo = saldo.add(monto);
         return true;
     }
 
-    public boolean retirar(double monto) {
+    public boolean retirar(BigDecimal monto) {
+
         if (estado != EstadoCuenta.ACTIVA) {
-            throw new CuentaBloqueadaException("La cuenta no está activa");
+            throw new CuentaBloqueadaException(
+                    "La cuenta no está activa"
+            );
         }
 
-
-        if (monto <= 0) {
-            throw new MontoInvalidoException("El monto debe ser mayor a 0");
+        if (monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new MontoInvalidoException(
+                    "El monto debe ser mayor a 0"
+            );
         }
 
-        if (monto > saldo) {
-            throw new SaldoInsuficienteException("La cuenta no tiene saldo suficiente");
+        if (monto.compareTo(saldo) > 0) {
+            throw new SaldoInsuficienteException(
+                    "La cuenta no tiene saldo suficiente"
+            );
         }
 
-        saldo -= monto;
+        saldo = saldo.subtract(monto);
         return true;
     }
 
-    public abstract double calcularCostoMantencion();
+    public abstract BigDecimal calcularCostoMantencion();
+    @Override
+    public boolean equals(Object o) {
 
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof CuentaBancaria cuenta)) {
+            return false;
+        }
+
+        return Objects.equals(numeroCuenta, cuenta.numeroCuenta);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numeroCuenta);
+    }
     @Override
     public String toString() {
         return "CuentaBancaria{" +
                 "numeroCuenta='" + numeroCuenta + '\'' +
                 ", titular=" + titular +
                 ", saldo=" + saldo +
+                ", estado=" + estado +
                 '}';
     }
 }

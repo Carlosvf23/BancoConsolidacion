@@ -1,24 +1,32 @@
+import java.math.BigDecimal;
+
 public class CuentaCorriente extends CuentaBancaria implements Transferible {
 
-    private double lineaCredito;
+    private BigDecimal lineaCredito;
 
     public CuentaCorriente(
             String numeroCuenta,
             Persona titular,
-            double lineaCredito
+            BigDecimal lineaCredito
     ) {
         super(numeroCuenta, titular);
         this.lineaCredito = lineaCredito;
+    }
 
+    public BigDecimal getLineaCredito() {
+        return lineaCredito;
     }
 
     @Override
-    public double calcularCostoMantencion() {
-        return 5000;
+    public BigDecimal calcularCostoMantencion() {
+        return new BigDecimal("5000");
     }
 
     @Override
-    public boolean transferir(CuentaBancaria destino, double monto) {
+    public boolean transferir(
+            CuentaBancaria destino,
+            BigDecimal monto
+    ) {
 
         if (!retirar(monto)) {
             return false;

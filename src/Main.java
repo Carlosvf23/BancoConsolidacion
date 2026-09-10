@@ -1,9 +1,9 @@
-import jdk.swing.interop.SwingInterOpUtils;
-
-import java.util.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -13,6 +13,7 @@ public class Main {
                 "12345678-9",
                 LocalDate.of(1995, 3, 7)
         );
+
         Persona persona2 = new Persona(
                 "Felipe",
                 "12345678-4",
@@ -22,135 +23,284 @@ public class Main {
         Banco banco = new Banco();
 
         System.out.println(persona1);
-
         System.out.println("Edad: " + persona1.getEdad());
 
-       // CuentaVista cuentaVista = new CuentaVista("003",persona1);
-        CuentaBancaria cuentaVista = new CuentaVista("003",persona1);
-        CuentaBancaria cuentaVista1 = new CuentaVista("004",persona2);
+        // Crear cuentas vista
+        CuentaBancaria cuentaVista =
+                new CuentaVista("003", persona1);
+
+        CuentaBancaria cuentaVista1 =
+                new CuentaVista("004", persona2);
+
         banco.agregarCuenta(cuentaVista);
         banco.agregarCuenta(cuentaVista1);
-        System.out.println(cuentaVista.calcularCostoMantencion());
 
-
-
-        CuentaCorriente cuentaCorriente = new CuentaCorriente("001",persona1,500000
+        System.out.println(
+                "Costo mantención Cuenta Vista: "
+                        + cuentaVista.calcularCostoMantencion()
         );
-        cuentaCorriente.depositar(100000);
+
+        // Crear cuenta corriente
+        CuentaCorriente cuentaCorriente =
+                new CuentaCorriente(
+                        "001",
+                        persona1,
+                        new BigDecimal("500000")
+                );
+
+        // Depositar dinero
+        cuentaCorriente.depositar(
+                new BigDecimal("100000")
+        );
+
         banco.agregarCuenta(cuentaCorriente);
-        cuentaCorriente.transferir(cuentaVista,30000);
 
-        cuentaCorriente.getSaldo();
-        cuentaVista.getSaldo();
+        // Transferencia correcta
+        cuentaCorriente.transferir(
+                cuentaVista,
+                new BigDecimal("30000")
+        );
 
-        System.out.println("Saldo cuenta corriente: " + cuentaCorriente.getSaldo());
-        System.out.println("Saldo cuenta vista: " + cuentaVista.getSaldo());
-        System.out.println(cuentaCorriente.getEstado());
+        System.out.println(
+                "Saldo cuenta corriente: "
+                        + cuentaCorriente.getSaldo()
+        );
 
+        System.out.println(
+                "Saldo cuenta vista: "
+                        + cuentaVista.getSaldo()
+        );
+
+        System.out.println(
+                "Estado inicial: "
+                        + cuentaCorriente.getEstado()
+        );
+
+        // Bloquear cuenta
         cuentaCorriente.bloquearCuenta();
 
+        System.out.println(
+                "Estado: "
+                        + cuentaCorriente.getEstado()
+        );
 
-        System.out.println("Estado: " + cuentaCorriente.getEstado());
-
+        // PRUEBA: transferencia con cuenta bloqueada
         try {
 
-            boolean resultado = cuentaCorriente.transferir(cuentaVista, 30000);
+            boolean resultado = cuentaCorriente.transferir(
+                    cuentaVista,
+                    new BigDecimal("30000")
+            );
 
-            System.out.println("Transferencia: " + resultado);
+            System.out.println(
+                    "Transferencia: " + resultado
+            );
 
         } catch (CuentaBloqueadaException e) {
 
-            System.out.println("Error: " + e.getMessage());
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
         }
 
-
-
+        // PRUEBA: retiro con cuenta bloqueada
         try {
 
-            cuentaCorriente.retirar(10000);
+            cuentaCorriente.retirar(
+                    new BigDecimal("3000")
+            );
 
             System.out.println("Retiro realizado");
 
         } catch (CuentaBloqueadaException e) {
 
-            System.out.println("Error: " + e.getMessage());
-
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
         }
 
+        // Volvemos a activar la cuenta
+        cuentaCorriente.activarCuenta();
 
-        /*try {
-            cuentaCorriente.retirar(-5000);
-        } catch (SaldoInsuficienteException e) {
-            System.out.println("Error:"+ e.getMessage());
+        // PRUEBA: monto inválido
+        try {
 
-        }*/
-
-        /*try {
-            cuentaCorriente.retirar(5000000);
-
-        } catch (CuentaBloqueadaException e) {
-            System.out.println("Error " + e.getMessage());
+            cuentaCorriente.retirar(
+                    new BigDecimal("-5000")
+            );
 
         } catch (MontoInvalidoException e) {
-            System.out.println("Error " + e.getMessage());
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
+        }
+
+        // PRUEBA: saldo insuficiente
+        try {
+
+            cuentaCorriente.retirar(
+                    new BigDecimal("5000000")
+            );
+
+        } catch (MontoInvalidoException e) {
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
 
         } catch (SaldoInsuficienteException e) {
-            System.out.println("Error " + e.getMessage());
-        }*/
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
+        }
+
+        // PRUEBA: depósito inválido
         try {
-            cuentaCorriente.depositar(-2000);
-        }catch (MontoInvalidoException e){
-            System.out.println("Error "+ e.getMessage());
+
+            cuentaCorriente.depositar(
+                    new BigDecimal("-2000")
+            );
+
+        } catch (MontoInvalidoException e) {
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
         }
 
+        // STREAM - cuentas activas
         for (CuentaBancaria cuenta :
-                banco.obtenerCuentasPorEstadoStream(EstadoCuenta.ACTIVA)) {
+                banco.obtenerCuentasPorEstadoStream(
+                        EstadoCuenta.ACTIVA)) {
 
-            System.out.println(cuenta);
+            System.out.println(
+                    "Cuenta activa: " + cuenta
+            );
         }
-        for (CuentaBancaria cuenta : banco.obtenerCuentasConSaldoMayorA(10000000)) {
-            System.out.println(cuenta);
+
+        // STREAM - cuentas con saldo mayor a $10.000
+        for (CuentaBancaria cuenta :
+                banco.obtenerCuentasConSaldoMayorA(
+                        new BigDecimal("10000"))) {
+
+            System.out.println(
+                    "Saldo mayor a 10000: " + cuenta
+            );
         }
+
+        // COUNT
         System.out.println(
-                "Cuentas activas: " +
-                        banco.contarCuentasPorEstado(EstadoCuenta.BLOQUEADA)
+                "Cuentas bloqueadas: "
+                        + banco.contarCuentasPorEstado(
+                        EstadoCuenta.BLOQUEADA)
         );
-        System.out.println(banco.existeCuentaConSaldoMayorA(1000)
-        );
+
+        // ANYMATCH
         System.out.println(
-                banco.existeCuentaConSaldoMayorA(1000000)
+                "¿Existe cuenta con saldo mayor a 1000? "
+                        + banco.existeCuentaConSaldoMayorA(
+                        new BigDecimal("1000"))
         );
-        for (String numero : banco.obtenerNumerosDeCuenta()) {
-            System.out.println("Número: " + numero);
+
+        System.out.println(
+                "¿Existe cuenta con saldo mayor a 1000000? "
+                        + banco.existeCuentaConSaldoMayorA(
+                        new BigDecimal("1000000"))
+        );
+
+        // MAP - obtener números de cuenta
+        for (String numero :
+                banco.obtenerNumerosDeCuenta()) {
+
+            System.out.println(
+                    "Número: " + numero
+            );
         }
-        for (String numero : banco.obtenerNumerosCuentasActivas()) {
-            System.out.println("Cuenta activa: " + numero);
+
+        // FILTER + MAP
+        for (String numero :
+                banco.obtenerNumerosCuentasActivas()) {
+
+            System.out.println(
+                    "Número de cuenta activa: " + numero
+            );
         }
-        Optional<CuentaBancaria> resultado = banco.obtenerPrimeraCuentaActiva();
+
+        // OPTIONAL - forma tradicional
+        Optional<CuentaBancaria> resultado =
+                banco.obtenerPrimeraCuentaActiva();
 
         if (resultado.isPresent()) {
-            System.out.println("Primera activa: " + resultado.get());
+
+            System.out.println(
+                    "Primera activa: "
+                            + resultado.get()
+            );
         }
+
+        // OPTIONAL - forma moderna con ifPresent
         banco.obtenerPrimeraCuentaActiva()
-                .ifPresent(cuenta -> System.out.println("Primera activa: " + cuenta));
+                .ifPresent(cuenta ->
+                        System.out.println(
+                                "Primera activa con ifPresent: "
+                                        + cuenta
+                        )
+                );
 
-        System.out.println(banco.buscarCuenta("003"));
-        System.out.println(banco.buscarCuenta("999"));
+        // Buscar cuenta existente
+        System.out.println(
+                banco.buscarCuenta("003")
+        );
 
+        // Buscar cuenta inexistente
+        System.out.println(
+                banco.buscarCuenta("999")
+        );
+
+        // CUENTA NO ENCONTRADA
         try {
-            banco.retirar("999", 10000);
+
+            banco.retirar(
+                    "999",
+                    new BigDecimal("10000")
+            );
+
         } catch (CuentaNoEncontradaException e) {
-            System.out.println("Error: " + e.getMessage());
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
         }
 
-        Map<String, CuentaBancaria> mapaCuentas = new HashMap<>();
+        // MAP DE PRÁCTICA
+        Map<String, CuentaBancaria> mapaCuentas =
+                new HashMap<>();
 
-        mapaCuentas.put("001", cuentaCorriente);
-        mapaCuentas.put("003", cuentaVista);
+        mapaCuentas.put(
+                "001",
+                cuentaCorriente
+        );
 
-        CuentaBancaria encontrada = mapaCuentas.get("003");
+        mapaCuentas.put(
+                "003",
+                cuentaVista
+        );
 
-        System.out.println(encontrada);
+        CuentaBancaria encontrada =
+                mapaCuentas.get("003");
+
+        System.out.println(
+                "Cuenta encontrada en Map: "
+                        + encontrada
+        );
+
+        // CONTADOR STATIC
+        System.out.println(
+                "Total cuentas creadas: "
+                        + CuentaBancaria
+                        .getCantidadTotalCuentasCreadas()
+        );
     }
-
 }
