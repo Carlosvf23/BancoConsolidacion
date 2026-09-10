@@ -1,8 +1,9 @@
 import jdk.swing.interop.SwingInterOpUtils;
 
+import java.util.*;
 import java.time.LocalDate;
-import java.util.Optional;
-
+import java.util.Map;
+import java.util.HashMap;
 public class Main {
 
     public static void main(String[] args) {
@@ -142,7 +143,14 @@ public class Main {
             System.out.println("Error: " + e.getMessage());
         }
 
+        Map<String, CuentaBancaria> mapaCuentas = new HashMap<>();
 
+        mapaCuentas.put("001", cuentaCorriente);
+        mapaCuentas.put("003", cuentaVista);
+
+        CuentaBancaria encontrada = mapaCuentas.get("003");
+
+        System.out.println(encontrada);
     }
 
 }
