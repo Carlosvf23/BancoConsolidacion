@@ -103,7 +103,30 @@ public class Main {
                                 "Desde BD: " + persona
                         )
                 );
+        Persona personaActualizada = new Persona(
+                "Andrea Actualizada",
+                "11111118-1",
+                LocalDate.of(1998, 5, 15)
+        );
 
+        boolean actualizada =
+                personaDAO.actualizar(personaActualizada);
+
+        System.out.println(
+                "Persona actualizada: " + actualizada
+        );
+        personaDAO.buscarPorRut("11111118-1")
+                .ifPresent(System.out::println);
+
+        try {
+
+            personaDAO.eliminarPorRut("12345678-9");
+
+        } catch (PersonaConCuentasException e) {
+
+            System.out.println("Error: " + e.getMessage());
+        }
     }
+
 
 }

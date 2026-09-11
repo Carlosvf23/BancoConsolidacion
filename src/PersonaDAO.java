@@ -121,4 +121,72 @@ public class PersonaDAO {
             );
         }
     }
+    public boolean actualizar(Persona persona) {
+
+        String sql = """
+            UPDATE personas
+            SET nombre = ?,
+                fecha_nacimiento = ?
+            WHERE rut = ?
+            """;
+
+        try (
+                Connection conexion = ConexionBD.obtenerConexion();
+                PreparedStatement statement = conexion.prepareStatement(sql)
+        ) {
+
+            statement.setString(1, persona.getNombre());
+
+            statement.setDate(
+                    2,
+                    java.sql.Date.valueOf(persona.getFechaNacimiento())
+            );
+
+            statement.setString(3, persona.getRut());
+
+            int filasAfectadas = statement.executeUpdate();
+
+            return filasAfectadas > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al actualizar la persona",
+                    e
+            );
+        }
+
+    }
+    public boolean eliminarPorRut(String rut) {
+
+        String sql = """
+            DELETE FROM personas
+            WHERE rut = ?
+            """;
+
+        try (
+                Connection conexion = ConexionBD.obtenerConexion();
+                PreparedStatement statement = conexion.prepareStatement(sql)
+        ) {
+
+            statement.setString(1, rut);
+
+            int filasAfectadas = statement.executeUpdate();
+
+            return filasAfectadas > 0;
+
+        } catch (SQLException e) {
+
+            if ("23503".equals(e.getSQLState())) {
+                throw new PersonaConCuentasException(
+                        "No se puede eliminar la persona porque tiene cuentas asociadas"
+                );
+            }
+
+            throw new RuntimeException(
+                    "Error al eliminar la persona",
+                    e
+            );
+        }
+    }
+
 }
