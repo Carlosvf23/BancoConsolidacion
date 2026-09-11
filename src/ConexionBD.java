@@ -9,7 +9,7 @@ public class ConexionBD {
 
     private static final String USUARIO = "postgres";
 
-    private static final String PASSWORD = "Escribetucontrasenha";
+    private static final String PASSWORD = "708090";
 
     public static Connection obtenerConexion() throws SQLException {
 

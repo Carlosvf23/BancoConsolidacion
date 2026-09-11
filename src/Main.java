@@ -65,5 +65,45 @@ public class Main {
                         + banco.contarCuentasPorEstado(
                         EstadoCuenta.ACTIVA)
         );
+        PersonaDAO personaDAO = new PersonaDAO();
+
+        for (Persona persona : personaDAO.listarPersonas()) {
+            System.out.println("Desde PostgreSQL: " + persona);
+        }
+        personaDAO.buscarPorRut("12345678-9")
+                .ifPresent(persona ->
+                        System.out.println("Encontrada: " + persona)
+                );
+        System.out.println(
+                personaDAO.buscarPorRut("99999999-9")
+        );
+        Persona persona3 = new Persona(
+                "Mariela",
+                "11111118-1",
+                LocalDate.of(1998, 5, 15)
+        );
+
+        try {
+
+            boolean guardada = personaDAO.guardar(persona3);
+
+            System.out.println(
+                    "Persona guardada: " + guardada
+            );
+
+        } catch (PersonaDuplicadaException e) {
+
+            System.out.println(
+                    "No se pudo guardar: " + e.getMessage()
+            );
+        }
+        personaDAO.buscarPorRut("11111111-1")
+                .ifPresent(persona ->
+                        System.out.println(
+                                "Desde BD: " + persona
+                        )
+                );
+
     }
+
 }
