@@ -4,6 +4,7 @@ import cl.carlos.banco.dao.CuentaDAO;
 import cl.carlos.banco.dao.PersonaDAO;
 import cl.carlos.banco.database.ConexionBD;
 import cl.carlos.banco.exception.CuentaDuplicadaException;
+import cl.carlos.banco.exception.CuentaNoEncontradaException;
 import cl.carlos.banco.exception.PersonaConCuentasException;
 import cl.carlos.banco.exception.PersonaDuplicadaException;
 import cl.carlos.banco.model.*;
@@ -187,6 +188,88 @@ public class Main {
                     "Error: " + e.getMessage()
             );
         }
+        for (CuentaBancaria cuenta :
+                cuentaDAO.listarCuentas()) {
+
+            System.out.println(
+                    "Cuenta BD: " + cuenta
+            );
+
+        }
+        CuentaBancaria cuentaActualizar =
+                cuentaDAO.buscarPorNumero("004")
+                        .orElseThrow(() ->
+                                new CuentaNoEncontradaException(
+                                        "No existe la cuenta 001"
+                                )
+                        );
+
+        System.out.println(
+                "Antes del UPDATE: " + cuentaActualizar
+        );
+
+// Modificamos el objeto en Java
+        cuentaActualizar.depositar(
+                new BigDecimal("5000")
+        );
+
+// Guardamos el nuevo estado en PostgreSQL
+        boolean cuentaActualizada =
+                cuentaDAO.actualizar(cuentaActualizar);
+
+        System.out.println(
+                "Cuenta actualizada: " + cuentaActualizada
+        );
+
+// Volvemos a consultar PostgreSQL para comprobar
+        cuentaDAO.buscarPorNumero("001")
+                .ifPresent(cuenta ->
+                        System.out.println(
+                                "Después del UPDATE: " + cuenta
+                        )
+                );
+        System.out.println(
+                "Existe antes de eliminar: " +
+                        cuentaDAO.buscarPorNumero("999").isPresent()
+        );
+
+        boolean cuentaEliminada =
+                cuentaDAO.eliminarPorNumero("999");
+
+        System.out.println(
+                "Cuenta eliminada: " +
+                        cuentaEliminada
+        );
+
+        System.out.println(
+                "Existe después de eliminar: " +
+                        cuentaDAO.buscarPorNumero("999").isPresent()
+        );
+        System.out.println("ANTES DEL ROLLBACK");
+
+        cuentaDAO.buscarPorNumero("001")
+                .ifPresent(System.out::println);
+
+        try {
+
+            cuentaDAO.transferir(
+                    "001",
+                    "999999",
+                    new BigDecimal("5000")
+            );
+
+        } catch (CuentaNoEncontradaException e) {
+
+            System.out.println(
+                    "Error controlado: " + e.getMessage()
+            );
+        }
+
+        System.out.println("DESPUÉS DEL ROLLBACK");
+
+        cuentaDAO.buscarPorNumero("001")
+                .ifPresent(System.out::println);
+
 
     }
 
