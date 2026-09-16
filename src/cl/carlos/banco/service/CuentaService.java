@@ -17,9 +17,23 @@ public class CuentaService {
 
     private final CuentaDAO cuentaDAO;
 
-    public CuentaService(CuentaDAO cuentaDAO) {
-        this.cuentaDAO = cuentaDAO;
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
+    public CuentaService(
+            CuentaDAO cuentaDAO
+    ) {
+
+        this.cuentaDAO =
+                cuentaDAO;
     }
+
+
+    // =========================================================
+    // TRANSFERENCIA
+    // =========================================================
 
     public boolean transferir(
             String numeroOrigen,
@@ -27,19 +41,42 @@ public class CuentaService {
             BigDecimal monto
     ) {
 
-        // ==========================================
-        // 1. VALIDACIONES QUE NO NECESITAN LA BD
-        // ==========================================
+        // =====================================================
+        // 1. VALIDACIONES BÁSICAS
+        // =====================================================
 
         if (monto == null ||
-                monto.compareTo(BigDecimal.ZERO) <= 0) {
+                monto.compareTo(
+                        BigDecimal.ZERO
+                ) <= 0) {
 
             throw new MontoInvalidoException(
                     "El monto debe ser mayor a 0"
             );
         }
 
-        if (numeroOrigen.equals(numeroDestino)) {
+
+        if (numeroOrigen == null ||
+                numeroOrigen.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "La cuenta origen es obligatoria"
+            );
+        }
+
+
+        if (numeroDestino == null ||
+                numeroDestino.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "La cuenta destino es obligatoria"
+            );
+        }
+
+
+        if (numeroOrigen.equals(
+                numeroDestino
+        )) {
 
             throw new IllegalArgumentException(
                     "La cuenta origen y destino deben ser diferentes"
@@ -47,20 +84,25 @@ public class CuentaService {
         }
 
 
-        // ==========================================
-        // 2. COMENZAR TRANSACCIÓN
-        // ==========================================
+        // =====================================================
+        // 2. ABRIMOS UNA SOLA CONNECTION
+        // =====================================================
 
-        try (Connection conexion =
-                     ConexionBD.obtenerConexion()) {
+        try (
+                Connection conexion =
+                        ConexionBD.obtenerConexion()
+        ) {
 
-            conexion.setAutoCommit(false);
+            conexion.setAutoCommit(
+                    false
+            );
+
 
             try {
 
-                // ==================================
+                // =============================================
                 // 3. BUSCAR CUENTA ORIGEN
-                // ==================================
+                // =============================================
 
                 CuentaBancaria origen =
                         cuentaDAO
@@ -76,9 +118,9 @@ public class CuentaService {
                                 );
 
 
-                // ==================================
+                // =============================================
                 // 4. BUSCAR CUENTA DESTINO
-                // ==================================
+                // =============================================
 
                 CuentaBancaria destino =
                         cuentaDAO
@@ -94,9 +136,9 @@ public class CuentaService {
                                 );
 
 
-                // ==================================
-                // 5. REGLAS DEL NEGOCIO
-                // ==================================
+                // =============================================
+                // 5. VALIDAR ESTADOS
+                // =============================================
 
                 if (origen.getEstado() !=
                         EstadoCuenta.ACTIVA) {
@@ -106,6 +148,7 @@ public class CuentaService {
                     );
                 }
 
+
                 if (destino.getEstado() !=
                         EstadoCuenta.ACTIVA) {
 
@@ -114,8 +157,17 @@ public class CuentaService {
                     );
                 }
 
-                if (origen.getSaldo()
-                        .compareTo(monto) < 0) {
+
+                // =============================================
+                // 6. VALIDAR SALDO
+                // =============================================
+
+                if (
+                        origen.getSaldo()
+                                .compareTo(
+                                        monto
+                                ) < 0
+                ) {
 
                     throw new SaldoInsuficienteException(
                             "Saldo insuficiente para transferir"
@@ -123,50 +175,83 @@ public class CuentaService {
                 }
 
 
-                // ==================================
-                // 6. CALCULAR NUEVOS SALDOS
-                // ==================================
+                // =============================================
+                // 7. CALCULAR NUEVOS SALDOS
+                // =============================================
 
                 BigDecimal nuevoSaldoOrigen =
                         origen.getSaldo()
-                                .subtract(monto);
+                                .subtract(
+                                        monto
+                                );
 
                 BigDecimal nuevoSaldoDestino =
                         destino.getSaldo()
-                                .add(monto);
+                                .add(
+                                        monto
+                                );
 
 
-                // ==================================
-                // 7. DAO ACTUALIZA POSTGRESQL
-                // ==================================
+                // =============================================
+                // 8. ACTUALIZAR CUENTA ORIGEN
+                // =============================================
 
-                cuentaDAO.actualizarSaldo(
-                        conexion,
-                        numeroOrigen,
-                        nuevoSaldoOrigen
-                );
-
-                cuentaDAO.actualizarSaldo(
-                        conexion,
-                        numeroDestino,
-                        nuevoSaldoDestino
-                );
+                boolean origenActualizado =
+                        cuentaDAO.actualizarSaldo(
+                                conexion,
+                                numeroOrigen,
+                                nuevoSaldoOrigen
+                        );
 
 
-                // ==================================
-                // 8. TODO FUNCIONÓ
-                // ==================================
+                if (!origenActualizado) {
+
+                    throw new RuntimeException(
+                            "No se pudo actualizar la cuenta origen"
+                    );
+                }
+
+
+                // =============================================
+                // 9. ACTUALIZAR CUENTA DESTINO
+                // =============================================
+
+                boolean destinoActualizado =
+                        cuentaDAO.actualizarSaldo(
+                                conexion,
+                                numeroDestino,
+                                nuevoSaldoDestino
+                        );
+
+
+                if (!destinoActualizado) {
+
+                    throw new RuntimeException(
+                            "No se pudo actualizar la cuenta destino"
+                    );
+                }
+
+
+                // =============================================
+                // 10. CONFIRMAR TRANSACCIÓN
+                // =============================================
 
                 conexion.commit();
 
                 return true;
 
+
             } catch (Exception e) {
+
+                // =============================================
+                // ALGO FALLÓ → DESHACEMOS TODO
+                // =============================================
 
                 conexion.rollback();
 
                 throw e;
             }
+
 
         } catch (SQLException e) {
 
