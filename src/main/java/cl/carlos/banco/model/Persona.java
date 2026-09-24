@@ -3,13 +3,24 @@ package cl.carlos.banco.model;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "personas")
 public class Persona {
 
-    private final String nombre;
-    private final String rut;
-    private final LocalDate fechaNacimiento;
-
+    @Column(name = "nombre")
+    private String nombre;
+    @Id
+    @Column(name = "rut")
+    private String rut;
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
+    protected Persona() {
+    }
     public Persona(
             String nombre,
             String rut,
