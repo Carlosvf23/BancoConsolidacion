@@ -23,4 +23,25 @@ public class PersonaService {
     public Optional<Persona> buscarPorRut(String rut) {
         return personaRepository.findById(rut);
     }
+
+    public Persona guardarPersona(Persona persona) {
+        return personaRepository.save(persona);
+    }
+    public void eliminarPersona(String rut) {
+        personaRepository.deleteById(rut);
+    }
+    public Optional<Persona> actualizarPersona(String rut, Persona datosNuevos) {
+
+        return personaRepository.findById(rut)
+                .map(personaExistente -> {
+
+                    Persona personaActualizada = new Persona(
+                            datosNuevos.getNombre(),
+                            rut,
+                            datosNuevos.getFechaNacimiento()
+                    );
+
+                    return personaRepository.save(personaActualizada);
+                });
+    }
 }

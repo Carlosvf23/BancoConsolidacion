@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 @RestController
 @RequestMapping("/api/personas")
 public class PersonaController {
@@ -30,4 +34,28 @@ public class PersonaController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @PostMapping
+    public Persona crearPersona(@RequestBody Persona persona) {
+        return personaService.guardarPersona(persona);
+    }
+    @DeleteMapping("/{rut}")
+    public ResponseEntity<Void> eliminarPersona(@PathVariable String rut) {
+
+        if (personaService.buscarPorRut(rut).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        personaService.eliminarPersona(rut);
+        return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/{rut}")
+    public ResponseEntity<Persona> actualizarPersona(
+            @PathVariable String rut,
+            @RequestBody Persona persona) {
+
+        return personaService.actualizarPersona(rut, persona)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 }
